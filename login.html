@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>zagazig blog --login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #00b4db 0%, #0083b0 100%);
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            width: 350px;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #5a67d8;
+        }
+        .error {
+            color: red;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .link a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        .link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2> zagazig blog</h2>
+        <input type="email" id="email" placeholder="Email" autocomplete="off">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="login()">Login</button>
+        <div class="error" id="error"></div>
+        <div class="link">
+            <a href="signup.html">Don't have an account? Sign up</a>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000';
+
+        async function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            if (!email || !password) {
+                document.getElementById('error').innerText = 'Please fill all fields';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (data.token) {
+                    localStorage.setItem('token', data.token);
+                    window.location.href = 'index.html';
+                } else {
+                    document.getElementById('error').innerText = data.error || 'Login failed';
+                }
+            } catch (error) {
+                document.getElementById('error').innerText = 'Cannot connect to server';
+            }
+        }
+    </script>
+</body>
+</html>

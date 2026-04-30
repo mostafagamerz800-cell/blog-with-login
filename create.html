@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Post - zagazig blog</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+        }
+        .header {
+            background: white;
+            padding: 20px 40px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            color: #333;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+        }
+        .btn-secondary {
+            background: #718096;
+            color: white;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 0 20px;
+        }
+        .form-card {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: bold;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 150px;
+        }
+        button {
+            background: #48bb78;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background: #38a169;
+        }
+        .error {
+            color: red;
+            text-align: center;
+            margin-top: 10px;
+        }
+        .success {
+            color: green;
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>My Blog</h1>
+        <a href="index.html" class="btn btn-secondary">Back to Posts</a>
+    </div>
+    <div class="container">
+        <div class="form-card">
+            <h2>Create New Post</h2>
+            <input type="text" id="title" placeholder="Post Title">
+            <textarea id="content" placeholder="Write your post content here..."></textarea>
+            <button onclick="createPost()">Publish Post</button>
+            <div id="message"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000';
+
+        function getToken() {
+            return localStorage.getItem('token');
+        }
+
+        async function createPost() {
+            const title = document.getElementById('title').value;
+            const content = document.getElementById('content').value;
+            const token = getToken();
+
+            if (!title || !content) {
+                document.getElementById('message').innerHTML = '<div class="error">Please fill all fields</div>';
+                return;
+            }
+
+            if (!token) {
+                document.getElementById('message').innerHTML = '<div class="error">Please login first</div>';
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/posts`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'token': token
+                    },
+                    body: JSON.stringify({ title, content })
+                });
+
+                const data = await response.json();
+
+                if (data.message) {
+                    document.getElementById('message').innerHTML = '<div class="success">Post created! Redirecting...</div>';
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1500);
+                } else {
+                    document.getElementById('message').innerHTML = '<div class="error">' + (data.error || 'Create failed') + '</div>';
+                }
+            } catch (error) {
+                document.getElementById('message').innerHTML = '<div class="error">Cannot connect to server</div>';
+            }
+        }
+
+        // Check if logged in
+        if (!getToken()) {
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>
